@@ -16,6 +16,14 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
 
     private final TwitterToKafkaServiceConfigData configData;
 
+    //This is a constructor injection
+    //We haven't used @Autowired which is ued with field injection.
+    //We are sure that TwitterToKafkaServiceConfigData will be initialized as soon as the main method runs.
+    //Constructor injection has some advantages over field injection.
+    //Field Injection uses reflection which basically slows down a program since types are resolved at runtime.
+    //Forces object creation with the injected object.
+    //Constructor injection favors immutability which is more stable
+
     public TwitterToKafkaServiceApplication(TwitterToKafkaServiceConfigData configData){
         this.configData = configData;
     }
@@ -28,5 +36,6 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
        LOG.info("App Starting!!!");
        LOG.info(Arrays.toString(configData.getTwitterKeywords().toArray(new String[] {})));
+       LOG.info(configData.getWelcomeMessage());
     }
 }
