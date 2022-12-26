@@ -42,6 +42,40 @@
       <groupId>com.microservices.base</groupId>
       <artifactId>app-config-data</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.microservices.base</groupId>
+      <artifactId>kafka-model</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.microservices.base</groupId>
+      <artifactId>kafka-admin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.microservices.base</groupId>
+      <artifactId>kafka-producer</artifactId>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <image>
+            <name>${project.groupId}/twitter.to.kafka.service:${project.version}</name>
+          </image>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <goals>
+              <goal>build-image</goal>
+            </goals>
+          </execution>
+        </executions>
+        </plugin>
+      </plugins>
+  </build>
 
 </project>

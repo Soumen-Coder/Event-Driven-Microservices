@@ -1,6 +1,7 @@
 package com.microservices.base.twitter.to.kafka.service;
 
 import com.microservices.base.config.TwitterToKafkaServiceConfigData;
+import com.microservices.base.twitter.to.kafka.service.init.StreamInitializer;
 import com.microservices.base.twitter.to.kafka.service.runner.StreamRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,8 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(TwitterToKafkaServiceApplication.class);
 
-    private final TwitterToKafkaServiceConfigData configData;
+    //private final TwitterToKafkaServiceConfigData configData;
+    private final StreamInitializer streamInitializer;
 
     private final StreamRunner streamRunner;
 
@@ -29,8 +31,9 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
     //Forces object creation with the injected object.
     //Constructor injection favors immutability which is more stable
 
-    public TwitterToKafkaServiceApplication(TwitterToKafkaServiceConfigData configData, StreamRunner streamRunner){
-        this.configData = configData;
+    public TwitterToKafkaServiceApplication(StreamInitializer streamInitializer, StreamRunner streamRunner){
+        //this.configData = configData;
+        this.streamInitializer = streamInitializer;
         this.streamRunner = streamRunner;
     }
 
@@ -41,8 +44,9 @@ public class TwitterToKafkaServiceApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
        LOG.info("App Starting!!!");
-       LOG.info(Arrays.toString(configData.getTwitterKeywords().toArray(new String[] {})));
-       LOG.info(configData.getWelcomeMessage());
+       //LOG.info(Arrays.toString(configData.getTwitterKeywords().toArray(new String[] {})));
+       //LOG.info(configData.getWelcomeMessage());
+        streamInitializer.init();
        LOG.info("Starting to read Twitter Messages :: ");
        streamRunner.start();
     }
