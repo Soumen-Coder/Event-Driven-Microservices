@@ -3,6 +3,6 @@
     <property name="DEV_HOME" value="./config-server/logs"/>
     <property name="APP_NAME" value="config-server"/>
 
-    <include name="logback-common.xml"/>
+    <include resource="logback-common.xml"/>
 
 </configuration>
