@@ -10,20 +10,15 @@
     <artifactId>app-config-data</artifactId>
 
     <dependencies>
+        <!--To use configuration and configurationProperties annotations-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
+            <scope>provided</scope> <!-- compile-only tool, not required at runtime -->
         </dependency>
     </dependencies>
 </project>

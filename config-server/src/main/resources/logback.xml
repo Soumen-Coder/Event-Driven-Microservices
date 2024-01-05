@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- common logback file to be used by all modules, just like the below, only changing the below two properties for specific need and use of include tag to include the common logback file -->
+<!-- scans the classpath for the logback-common.xml file, and it is in the classpath since it is included under the resources folder of app-config-data module -->
 <configuration>
     <property name="DEV_HOME" value="./config-server/logs"/>
     <property name="APP_NAME" value="config-server"/>
 
     <include resource="logback-common.xml"/>
-
 </configuration>

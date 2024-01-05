@@ -14,7 +14,7 @@ import javax.annotation.PreDestroy;
 import java.util.Arrays;
 
 @Component
-//@ConditionalOnProperty(name = "${twitter-to-kafka-service.enable-mock-tweets}", havingValue = "false", matchIfMissing = true)
+//@ConditionalOnProperty(name = "${twitter-to-kafka-service.enable-mock-tweets}", havingValue = "false", matchIfMissing = true) -> allows to load a spring bean at runtime with the configuration value, if true, then only this will load, but now its false
 @ConditionalOnExpression("${twitter-to-kafka-service.enable-mock-tweets} && not ${twitter-to-kafka-service.enable-v2-tweets}")
 public class TwitterKafkaStreamRunner implements StreamRunner {
     private final Logger LOG = LoggerFactory.getLogger(TwitterKafkaStreamRunner.class);
@@ -40,7 +40,8 @@ public class TwitterKafkaStreamRunner implements StreamRunner {
         LOG.info("Filtering Twitter Streams for keywords {}", Arrays.toString(keywords));
     }
 
-    @PreDestroy
+    @PreDestroy //called before the bean destroys, before the application shutdown, so that stream connection gets closed prior to application close
+    //@PreDestroy is not called with @Prototype, remember this. As of now, by default, Spring beans are singleton, we haven't declared them prototype.
     public void shutDown(){
         if(twitterStream!=null){
             LOG.info("Closing Twitter Stream, shutting down before the application stops");

@@ -1,5 +1,6 @@
 version: '3.7'
 services:
+  #Organization of kafka cluster, health and leader election, coming releases of Kafka, zookeeper is planned to be removed.
   zookeeper:
     image: confluentinc/cp-zookeeper:${KAFKA_VERSION:-latest}
     hostname: zookeeper
@@ -14,6 +15,10 @@ services:
       ZOOKEEPER_SERVERS: zookeeper:2888:3888
     networks:
       - ${GLOBAL_NETWORK:-kafka}
+
+  #Schema Registry forces producers and consumers to use a valid schema.
+  #Producers and consumers checks schema with ID and cache the result before sending and receiving data. One time req to schema registry and subsequent checks are done by cache.
+  #It also allows backward and forward compatibility, helps schema to evolve without breaking changes.
   schema-registry:
     image: confluentinc/cp-schema-registry:${KAFKA_VERSION}
     hostname: schema-registry
@@ -31,6 +36,7 @@ services:
       SCHEMA_REGISTRY_DEBUG: 'true'
     networks:
       - ${GLOBAL_NETWORK:-kafka}
+  # Why 3 clusters - to attain "QUORUM" - Minimum no. of brokers required to form a network(to conduct a business), prevents split brain issue. Prevents creating more than one group of kafka clusters.
   kafka-broker-1:
     image: confluentinc/cp-kafka:${KAFKA_VERSION}
     hostname: kafka-broker-1
@@ -39,11 +45,14 @@ services:
     depends_on:
       - zookeeper
     environment:
+      # unique ID
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      #internal comm - 9092, from outside : 19092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-1:9092,LISTENER_LOCAL://localhost:19092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,LISTENER_LOCAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # end-to-end compression
       KAFKA_COMPRESSION_TYPE: producer
     networks:
       - ${GLOBAL_NETWORK:-kafka}
@@ -79,3 +88,6 @@ services:
       KAFKA_COMPRESSION_TYPE: producer
     networks:
       - ${GLOBAL_NETWORK:-kafka}
+# docker run -t --network=host confluentinc/cp-kafkacat -L -b localhost:19092
+# kafkacat -L -b localhost:19092 (-L stands for List and -b for brokers) so after -b we provide hostname:port to connect to cluster from outside what has been exposed for the kafka-cluster-1 image
+# kafkacat -C -b localhost:19092 -t twitter-topic

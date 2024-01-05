@@ -13,6 +13,7 @@
     <artifactId>kafka-model</artifactId>
 
     <dependencies>
+        <!-- helps with data serialization between different system, has strict schema and efficient byte serialization-->
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
@@ -28,11 +29,12 @@
     <build>
         <plugins>
             <plugin>
+                <!-- create Java classes from avro schema file -->
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro-maven-plugin</artifactId>
                 <version>${avro.version}</version>
                 <configuration>
-                    <stringType>String</stringType>
+                    <stringType>String</stringType> <!-- default text is converted to character in avro schema, but we want Java String -->
                 </configuration>
                 <executions>
                     <execution>

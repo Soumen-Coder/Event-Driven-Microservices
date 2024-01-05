@@ -49,6 +49,7 @@ public class KafkaProducerConfig<K extends Serializable, V extends SpecificRecor
     }
 
     @Bean
+    //KafkaTemplate is actually a wrapper class around KafkaProducer and it provides some methods to be able to send data to kafka easily
     public KafkaTemplate<K, V> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }

@@ -1,0 +1,8 @@
+{
+  "_comment-POST": "http://localhost:9200/twitter-index/_doc/1 - POST REQUEST FOR TWITTER_INDEX",
+  "_comment-GET": "http://localhost:9200/twitter-index/_search?q=id:1  - Query Params key=q and value=id:1",
+  "userId": "1",
+  "id": "1",
+  "createdAt": "2024-01-03T23:00:50+0000",
+  "text": "test multi word"
+}

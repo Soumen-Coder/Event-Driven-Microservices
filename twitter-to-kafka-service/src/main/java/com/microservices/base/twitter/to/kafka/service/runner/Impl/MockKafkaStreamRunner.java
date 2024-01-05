@@ -89,6 +89,7 @@ public class MockKafkaStreamRunner implements StreamRunner {
         Executors.newSingleThreadExecutor().submit(() -> {
             //implementation of a Runnable
             try {
+                //infinite loop to simulate the working of an infinite continuous stream flow
                 while (true) {
                     String formattedTweetAsRawJson = getFormattedTweet(keywords, minTweetLength, maxTweetLength);
                     Status status = TwitterObjectFactory.createStatus(formattedTweetAsRawJson);
@@ -111,10 +112,10 @@ public class MockKafkaStreamRunner implements StreamRunner {
 
     private String getFormattedTweet(String[] keywords, int minTweetLength, int maxTweetLength) {
         String[] params = new String[]{
-                ZonedDateTime.now().format(DateTimeFormatter.ofPattern(TWITTER_STATUS_DATE_FORMAT, Locale.ENGLISH)),
-                String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)),
-                getRandomTweetContent(keywords, minTweetLength, maxTweetLength),
-                String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE))
+                ZonedDateTime.now().format(DateTimeFormatter.ofPattern(TWITTER_STATUS_DATE_FORMAT, Locale.ENGLISH)), // sets the created_at field, the date formatter pattern used is in english locale, if the Locale.ENGLISH is not used, you will get parse error.
+                String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)), //ThreadLocalRandom to get a long number to set id field of the tweet, there is no nextLong method with an upperbound in Random class hence ThreadLocalRandom is being used
+                getRandomTweetContent(keywords, minTweetLength, maxTweetLength), // creates the text field
+                String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)) //ThreadLocalRandom is thread-safe as well. This sets the user id field
         };
         return formatTweetAsJsonWithParams(params);
     }

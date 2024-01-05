@@ -7,10 +7,17 @@ services:
     volumes:
       - "./docker-logs:/workspace/twitter-to-kafka-service/logs"
       - "./check-config-server-started.sh:/usr/local/bin/check-config-server-started.sh"
+    #running compose file with user root
     user: root
     entrypoint: [ "check-config-server-started.sh" ]
+    #depends_on only checks if the container is up and running, doesn't check if the application inside the container is up and running. Hence, we need more solid health check so we wrote a health check script to wait for config server to return a 200 response, because application need config-server for sure to be able to run.
     depends_on:
       - config-server
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+    # we will run everything inside docker hence all localhost are replaced with their respective hostnames
+    #inside docker, all containers acts as different hosts hence different hostnames.
     environment:
       - "JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -Xms128m -Xmx256m"
       - "LOGGING_LEVEL_COM_MICROSERVICES_BASE=info"
@@ -18,19 +25,71 @@ services:
       - "KAFKA-CONFIG_TOPIC-NAME=twitter-topic"
       - "KAFKA-CONFIG_BOOTSTRAP-SERVERS=kafka-broker-1:9092, kafka-broker-2:9092, kafka-broker-3:9092"
       - "KAFKA-CONFIG_SCHEMA-REGISTRY-URL=http://schema-registry:8081"
-      - "TWITTER-TO-KAFKA-SERVICE_ENABLE-MOCK-TWEETS=false"
+      - "TWITTER-TO-KAFKA-SERVICE_ENABLE-MOCK-TWEETS=true"
+      #cannot use localhost anymore, inside the container use hostname
       - "SPRING_CLOUD_CONFIG_URI=http://config-server:8888"
       - "ENCRYPT_KEY=${ENCRYPT_KEY}"
     networks:
       - ${GLOBAL_NETWORK:-services}
+
   config-server:
     image: ${GROUP_ID}/config.server:${SERVICE_VERSION:-latest}
     ports:
-      - "5006:5006"
+      - "5007:5007"
+      #This port was opened because we need to reach config server running on localhost, we were running the kafka-elastic-service locally and it has the uri configured in bootstrap.yml stating that config server is up on 8888 and rest all were running on docker and hence this port was needed to be opened.
+      #conatiner port: localhost port
+      - "8888:8888"
     volumes:
+      #map the docker logs folder to the docker-logs folder in the service. The /workspace/config-server/logs was created by build image call of spring boot maven plugin and containers have this log folder inside the container
       - "./docker-logs:/workspace/config-server/logs"
     environment:
-      - "JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006 -Xms512m -Xmx1024m"
+      #5007 below is used for remote debugging with minimum and maximum JVM heap sizes
+      - "JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 -Xms512m -Xmx1024m"
+      # tp decrypt secrets at run, we passed encrypt key here
       - "ENCRYPT_KEY=${ENCRYPT_KEY}"
     networks:
       - ${GLOBAL_NETWORK:-services}
+
+  kafka-to-elastic-service:
+    image: ${GROUP_ID}/kafka.to.elastic.service:${SERVICE_VERSION:-latest}
+    ports:
+      - "5006:5006"
+    volumes:
+      - "./docker-logs:/workspace/kafka-to-elastic-service/logs"
+      - "./check-kafka-topics-created.sh:/usr/local/bin/check-kafka-topics-created.sh"
+    #we run this as root in order to run the shell scripts and the required programs in the shell like curl or kafkacat command
+    user: root
+    entrypoint: [ "check-kafka-topics-created.sh" ]
+    depends_on:
+      - config-server
+      - twitter-to-kafka-service
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+      - elastic-1
+      - elastic-2
+      - elastic-3
+    environment:
+      - "JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006 -Xms128m -Xmx256m"
+      - "LOGGING_LEVEL_COM_MICROSERVICES_BASE=info"
+      - "LOGGING_LEVEL_ROOT=info"
+      - "KAFKA-CONFIG_TOPIC-NAME=twitter-topic"
+      #kafka hostnames as docker hostnames
+      - "KAFKA-CONFIG_BOOTSTRAP-SERVERS=kafka-broker-1:9092, kafka-broker-2:9092, kafka-broker-3:9092"
+      - "KAFKA-CONFIG_SCHEMA-REGISTRY-URL=http://schema-registry:8081"
+      - "SPRING_CLOUD_CONFIG_URI=http://config-server:8888"
+      - "ELASTIC-CONFIG_INDEX-NAME=twitter-index"
+      - "ELASTIC-CONFIG_CONNECTION-URL=http://elastic-1:9200"
+      - "ENCRYPT_KEY=${ENCRYPT_KEY}"
+      - "ELASTIC-CONFIG_IS-REPOSITORY=true"
+    networks:
+      - ${GLOBAL_NETWORK:-services}
+
+#docker-compose -f common.yml kafka_cluster.yml -f services.yml up
+#we can use docker-compose up because we have mentioned all the files required as COMPOSE_FILE in the .env file
+#docker-compose down for shutting down containers
+#we can run any command inside container : docker exec -it 28db700b9599 /bin/bash
+#Here inside container you will find the .cnb/lifecycle/launcher
+#to see memory and cpu usage of the container, can run linux command inside container : top command
+
+#List images in a local repository -> docker images | grep 'com.microservices.base/kafka.to.elastic.service'

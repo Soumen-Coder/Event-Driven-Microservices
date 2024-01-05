@@ -1,0 +1,70 @@
+version: '3.7'
+services:
+  elastic-1:
+    #official elasticsearch docker image
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-latest}
+    hostname: elastic-1
+    environment: #maintaining 3(odd) no of nodes to maintain a quorum, 3 eligible master nodes, at max only one can fall and rest two can form a quorum. Advised to use odd number of master eligible nodes.
+      - node.name=elastic-1 #unique name of each node
+      - cluster.name=es-twitter-cluster # cluster name to which the node belongs
+      - discovery.seed_hosts=elastic-2,elastic-3 # to discover and communicate among other nodes, node 1 can find & communicate node 2 and 3.
+      - cluster.initial_master_nodes=elastic-1,elastic-2,elastic-3 # out of three any one can be master
+      - bootstrap.memory_lock=true # to prevent swapping. Most os use as much memory possible for file system caches and eagerly swap out unused application memory, this can result to parts of jvm heap or even its executable pages being swapped out to disk. Swapping is bad, avaoided at all costs. Swapping can cause gc to last for minutes instead of milliseconds and can cause nodes to respond slowly.
+      # in a resilient system it is effective to kill the node which does swapping.
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # memory for running the app
+    ulimits: # permission given to elastic search to lock memory using the memory_lock property above
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      #reach container outside of container
+      - 9200:9200
+    networks:
+      - ${GLOBAL_NETWORK:-elastic}
+  elastic-2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    environment:
+      - node.name=elastic-2
+      - cluster.name=es-twitter-cluster
+      - discovery.seed_hosts=elastic-1,elastic-3
+      - cluster.initial_master_nodes=elastic-1,elastic-2,elastic-3
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+    networks:
+      - ${GLOBAL_NETWORK:-elastic}
+  elastic-3:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    environment:
+      - node.name=elastic-3
+      - cluster.name=es-twitter-cluster
+      - discovery.seed_hosts=elastic-1,elastic-2
+      - cluster.initial_master_nodes=elastic-1,elastic-2,elastic-3
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data03:/usr/share/elasticsearch/data #persistence of data, after restarting of the compose file, data will be present
+    networks:
+      - ${GLOBAL_NETWORK:-elastic}
+#volumne for making data persistent after restarting the docker-compose file
+volumes:
+  data01:
+    driver: local
+  data02:
+    driver: local
+  data03:
+    driver: local
+#running the file : docker-compose -f common.yml -f elastic_cluster.yml up
+#Elasticsearch quorum formula : (master_eligible_nodes/2+1) - with 1 master node, 2 nodes will be available to construct a network.
+#with two nodes, we cannot form a network because maximum master node can be 2, if 1 goes down, there is only 1 master eligible node which is not permitted.

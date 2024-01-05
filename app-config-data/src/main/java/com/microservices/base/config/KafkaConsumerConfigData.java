@@ -3,7 +3,9 @@ package com.microservices.base.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-
+//Each partition can only be assigned to a single consumer
+//It is not possible to read a single partition by multiple consumer.
+//But, it is possible to read multiple partitions by single consumer.
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "kafka-consumer-config")

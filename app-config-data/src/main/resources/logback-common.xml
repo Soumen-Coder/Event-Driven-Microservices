@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- common logback file to be used by all modules, just like the below, only changing the two properties for specific need and use of include tag to include the common logback file -->
+<!-- the "configuration" tag has been removed from here, and "included" is being used here-->
+<!-- the configuration tag will be used in the respective service's logback file -->
+<!-- since we have put the logback-common.xml file in the classpath, it will end up in the classpath, so in the respective service's logback file we can use resource and not use any path there-->
 <included>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
@@ -31,7 +35,7 @@
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </logger>
-
+    <!-- trace > debug > info > warn > error-->
     <root level="info">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>

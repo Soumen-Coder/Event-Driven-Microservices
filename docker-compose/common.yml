@@ -1,5 +1,7 @@
 version: '3.7'
-
+#sets network type as bridge - creates a network to connect with hostnames(not IPAddresses) to communicate, preventing other containers to reach the network
+#if you don't set one, a default network will be created. And on default network containers can access each other by IPAddresses by default. Common network allows containers to access each other by hostname which is more handy as IPAddresses are dynamic in nature
+#containers with different network cannot communicate with each other.
 networks:
   application:
     driver: bridge

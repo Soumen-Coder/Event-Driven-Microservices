@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: twitter-to-kafka-service #name of microservice
+  profiles:
+    active: twitter_to_kafka #used to prepare the name of file from where configuration to be fetched from in config-server-repository
+  config:
+    import: 'configserver:'
+  cloud:
+    config:
+      name: twitter-to-kafka-service,config-client #this config-client is important because we used this prefix in the config-server-repository module -> spring cloud config name and profiles active together makes the name to fetch configuration from
+      #http://localhost:8888/config-client/twitter_to_kafka
+      uri: http://localhost:8888 #url of config server, now running on localhost
+      username: spring_cloud_user
+      password: '******************************************************************************'
+
+#encrypt:
+#  key: ${ENCRYPT_KEY}

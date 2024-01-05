@@ -13,16 +13,12 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import twitter4j.Status;
-import twitter4j.TwitterException;
-import twitter4j.TwitterObjectFactory;
+import twitter4j.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,7 +33,8 @@ import java.util.Locale;
 import java.util.Map;
 
 @Component
-@ConditionalOnExpression("${twitter-to-kafka-service.enable-v2-tweets} && not ${twitter-to-kafka-service.enable-mock-tweets}")
+//@ConditionalOnProperty(value = "${twitter-to-kafka-service.enable-v2-tweets}", havingValue = "true", matchIfMissing = true) -> allows to load a spring bean at runtime with the configuration value, if true, then only this will load
+@ConditionalOnExpression("${twitter-to-kafka-service.enable-mock-tweets} && not ${twitter-to-kafka-service.enable-v2-tweets}") // loads if enable-v2-tweets = true and enable-mock-tweets = false
 public class TwitterV2StreamHelper {
     private static final Logger LOG = LoggerFactory.getLogger(TwitterV2StreamHelper.class);
 
@@ -78,7 +75,7 @@ public class TwitterV2StreamHelper {
         HttpResponse response = httpClient.execute(httpGet);
         HttpEntity entity = response.getEntity();
         if (null != entity) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader((entity.getContent())));
+            BufferedReader reader = new BufferedReader(new InputStreamReader((entity.getContent()))); // gets stream continuously using BufferedReader
             String line = reader.readLine();
             while (line != null) {
                 line = reader.readLine();
@@ -115,6 +112,7 @@ public class TwitterV2StreamHelper {
      * Helper method to create rules for filtering
      * */
     private void createRules(String bearerToken, Map<String, String> rules) throws URISyntaxException, IOException {
+        //To call the api use httpClient
         HttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setCookieSpec(CookieSpecs.STANDARD).build())
@@ -153,7 +151,7 @@ public class TwitterV2StreamHelper {
         HttpEntity entity = response.getEntity();
         if (null != entity) {
             JSONObject json = new JSONObject(EntityUtils.toString(entity, "UTF-8"));
-            if (json.length() > 1 && json.has("data")) {
+            if (json.length() > 1 && json.has("data")) { // only if "json has data check", if we call api first time and then there is no rule, we don't get parse error.
                 JSONArray array = (JSONArray) json.get("data");
                 for (int i = 0; i < array.length(); i++) {
                     JSONObject jsonObject = (JSONObject) array.get(i);

@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
-
+//Lombok adds getters and setters and updates the class file during compilation and the resulting byte-code that will be created by JVM will include these methods created by Lombok.
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "twitter-to-kafka-service")

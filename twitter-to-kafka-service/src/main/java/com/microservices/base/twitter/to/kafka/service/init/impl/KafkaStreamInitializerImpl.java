@@ -23,8 +23,8 @@ public class KafkaStreamInitializerImpl implements StreamInitializer {
 
     @Override
     public void init() {
-        kafkaAdminClient.createTopics();
-        kafkaAdminClient.checkSchemaRegistry();
+        kafkaAdminClient.createTopics(); // create the kafka topics before the application startup
+        kafkaAdminClient.checkSchemaRegistry(); // check if the schema registry is up and running fine, before running our service
         LOG.info("Topics with name {} is ready for operations!!!", kafkaConfigData.getTopicNamesToCreate().toArray());
     }
 }

@@ -8,13 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import javax.annotation.PreDestroy;
 
-@Component
+@Service
+//K -> key is Long and V is TwitterAvroModel, a class from the kafka-model
+// Key parameter is used to determine the target partition of a message
 public class TwitterKafkaProducerImpl implements KafkaProducer<Long, TwitterAvroModel> {
 
     private static final Logger LOG = LoggerFactory.getLogger(TwitterKafkaProducerImpl.class);
@@ -27,8 +29,9 @@ public class TwitterKafkaProducerImpl implements KafkaProducer<Long, TwitterAvro
     @Override
     public void send(String topicName, Long key, TwitterAvroModel message) {
         LOG.info("Sending message='{}' to topic='{}'", message, topicName);
+        //ListenableFuture -> Registers callBack methods(addCallback()) for handling events(onSuccess and onFailure) when response return
         ListenableFuture<SendResult<Long, TwitterAvroModel>> kafkaResultFuture =
-                kafkaTemplate.send(topicName, key, message);
+                kafkaTemplate.send(topicName, key, message); //the send method from kafkaTemplate is an async operation and hence it returns a Future object, ListenableFuture, and to get the response back async, we simply added a callback and override its onSuccess and onFailure methods.
         addCallback(topicName, message, kafkaResultFuture);
     }
 
@@ -36,7 +39,7 @@ public class TwitterKafkaProducerImpl implements KafkaProducer<Long, TwitterAvro
     public void close() {
         if (kafkaTemplate != null) {
             LOG.info("Closing kafka producer!");
-            kafkaTemplate.destroy();
+            kafkaTemplate.destroy(); //destroyed successfully before shutdown of the application
         }
     }
 

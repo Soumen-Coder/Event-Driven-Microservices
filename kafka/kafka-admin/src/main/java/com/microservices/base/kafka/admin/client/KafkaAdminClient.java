@@ -21,21 +21,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
+// Creates and checks kafka topics programmatically
 @Component
 public class KafkaAdminClient {
-
     private static final Logger LOG = LoggerFactory.getLogger(KafkaAdminClient.class);
-
     private KafkaConfigData kafkaConfigData;
-
     private RetryConfigData retryConfigData;
-
     private AdminClient adminClient;
-
-    private RetryTemplate retryTemplate;
-
-    private WebClient webClient;
+    private RetryTemplate retryTemplate; // we need a retry logic because when we start everything together including kafka cluster and other services, you need to wait for certain time to until kafka cluster is healthy and be able to create topics and return list of topics
+    private WebClient webClient; //webClient bean created in the WebClientConfig.
 
     public KafkaAdminClient(KafkaConfigData config,
                             RetryConfigData retryConfigData,
@@ -52,6 +46,7 @@ public class KafkaAdminClient {
     public void createTopics() {
         CreateTopicsResult createTopicsResult;
         try {
+            //retryTemplate.execute -> call a method with retry logic configured in the RetryConfig
             createTopicsResult = retryTemplate.execute(this::doCreateTopics);
         }catch (Throwable t){
             throw new KafkaClientException("Reached maximum number of exception for creating kafka topic(s)!");
@@ -59,6 +54,7 @@ public class KafkaAdminClient {
         checkTopicsCreated();
     }
 
+    //Don't want to fail at startup because of schemaRegistry is unreachable.
     public void checkSchemaRegistry(){
        int retryCount=1;
        Integer maxRetry = retryConfigData.getMaxAttempts();
@@ -87,17 +83,20 @@ public class KafkaAdminClient {
 
     private HttpStatus getSchemaRegistryStatus(){
         try{
+            // WebClient comes from the WebFlux Dependency
+            // It is non-blocking, reactive client to perform http req, creates a fluent API
             return webClient
                     .method(HttpMethod.GET)
                     .uri(kafkaConfigData.getSchemaRegistryUrl())
                     .exchange()
                     .map(ClientResponse::statusCode)
-                    .block();
+                    .block(); // get results synchronously from schema registry
         }catch(Exception e){
             return HttpStatus.SERVICE_UNAVAILABLE;
         }
     }
 
+    //Custom retry logic -> wait until topics created or max retry reached, increasing wait time exponentially
     public void checkTopicsCreated() {
         Collection<TopicListing> topics = getTopics();
         int retryCount = 1;
@@ -151,6 +150,6 @@ public class KafkaAdminClient {
                kafkaConfigData.getNumOfPartitions(),
                kafkaConfigData.getReplicationFactor()
                )).collect(Collectors.toList());
-       return adminClient.createTopics(kafkaTopics);
+       return adminClient.createTopics(kafkaTopics); //createTopics is an async operation, takes time to create topics, wait for creation, until then checkTopicsCreated()
     }
 }

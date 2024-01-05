@@ -1,0 +1,38 @@
+{
+    "_comment1": "http://localhost:9200/twitter-index - It is a PUT request",
+    "_comment2": "http://localhost:9200/twitter-index/_doc/1 - mapping for documentId=1",
+    "_comment3": "http://localhost:9200/twitter-index/_search - Gets all data",
+    "_comment4": "http://localhost:9200/twitter-index/_search?size=2000 - Specific size in query",
+    "_comment5": "http://localhost:9200/twitter-index/_search?q=id:1 - Get data with id=1",
+    "_comment6": "http://localhost:9200/twitter-index/_search?q=text:test - Get data with text=test",
+    "_comment7": "No need to put _doc mapping in query as current elastic search only allows one mapping",
+    "mappings": {
+        "properties": {
+            "userId": {
+                "type": "long"
+            },
+            "id": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "createdAt": {
+                "type": "date",
+		"format": "yyyy-MM-dd'T'HH:mm:ssZZ"
+            },
+            "text": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            }
+        }
+    }
+}
