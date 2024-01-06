@@ -1,7 +1,6 @@
 package com.microservices.base.elastic.query.service.config;
 
 import com.microservices.base.config.UserConfigData;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -12,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity //This annotation along with WebSecurityConfigurerAdapter allows to add security logic to this class
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserConfigData userConfigData;
 
@@ -22,7 +21,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity httpSecurity) throws Exception {
-        /* httpSecurity.authorizeRequests()
+        /* Allow all paths and bypass authentication
+        httpSecurity.authorizeRequests()
                 .antMatchers("/**")
                 .permitAll(); */
         httpSecurity
@@ -32,20 +32,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/**").hasRole("USER")
                 .and()
                 .csrf()
-                .disable(); // csrf protection is only required if we are interacting with browser in which case a token should be sent by browser to server for authentication to stop unwanted attacks
+                .disable(); // csrf, also known as session riding, protection is only required if we are interacting with browser in which case csrf protection will request to add a token to be sent from browser to server for authentication to stop unwanted attacks to the website in which the user is already logged in and has an active session.
     }
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
                 .withUser(userConfigData.getUsername())
+                //if we use the below method, we will see in postman a basic authorization header is added to the request and username and password is sent to server for auth by encoding with Base64 encoding.
+                //.password("{noop}****") -> "no operation password" for plain text, it's temporary and doesn't look good, only for local testing
+                //we shouldn't work with noop password for plain text, and there will be an error as well in the app, it will ask for password encoder
+                //we should use password encoder, in that case we won't hold the plain text password in-memory, but only hold a hashed version and do the comparison with a hashed value with a user provided password
                 .password(passwordEncoder().encode(userConfigData.getPassword()))
-                //.password(userConfigData.getPassword()) // issue no password encoder for id null
+                //.password(userConfigData.getPassword()) // issue no password encoder specified for id null
                 .roles(userConfigData.getRoles());
     }
 
     @Bean
     protected PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // uses BCrypt strong hashing function which is an adaptive function and uses iteration count to increase difficulty against brute force attacks in addition to using salts to protect against rainbow table attacks.
     }
 }
