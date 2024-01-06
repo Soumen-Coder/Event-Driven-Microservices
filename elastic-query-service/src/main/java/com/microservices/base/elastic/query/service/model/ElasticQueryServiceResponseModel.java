@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor //used to construct java object while deserialize json
 @AllArgsConstructor //required by Builder
 public class ElasticQueryServiceResponseModel extends RepresentationModel<ElasticQueryServiceResponseModel> {
+    //Defining all fields present within elastic search
     private String id;
     private Long userId;
     private String text;

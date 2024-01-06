@@ -1,7 +1,7 @@
 {
     "_comment1": "http://localhost:9200/twitter-index - It is a PUT request",
     "_comment2": "http://localhost:9200/twitter-index/_doc/1 - mapping for documentId=1",
-    "_comment3": "http://localhost:9200/twitter-index/_search - Gets all data",
+    "_comment3": "http://localhost:9200/twitter-index/_search - Gets all data(Max 10000 records - use scrollApi to get more)",
     "_comment4": "http://localhost:9200/twitter-index/_search?size=2000 - Specific size in query",
     "_comment5": "http://localhost:9200/twitter-index/_search?q=id:1 - Get data with id=1",
     "_comment6": "http://localhost:9200/twitter-index/_search?q=text:test - Get data with text=test",

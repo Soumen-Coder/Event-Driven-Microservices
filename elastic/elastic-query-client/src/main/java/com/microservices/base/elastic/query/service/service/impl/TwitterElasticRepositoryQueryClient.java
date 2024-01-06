@@ -7,10 +7,16 @@ import com.microservices.base.elastic.query.service.repository.TwitterElasticSea
 import com.microservices.base.elastic.query.service.service.ElasticQueryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
+@Primary
+@Service
+//ElasticRepository -> Can add method definitions to interface by setting correct name for property to search
+//ElasticRepository cannot be used to send complex queries like bool to elasticsearch
+//ElasticRepository is a high level client that offers predefined methods like findAll, findById to query against the fields on the elasticsearch.
 public class TwitterElasticRepositoryQueryClient implements ElasticQueryClient<TwitterIndexModel> {
     private static final Logger LOG = LoggerFactory.getLogger(TwitterElasticRepositoryQueryClient.class);
     private final TwitterElasticSearchQueryRepository repository;

@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController //mixture of @Controller and @ResponseBody
-//@ResponseBody is used to deserialize the java object to json based response
-//@RequestBody is used to deserialize json into java object
+//@ResponseBody -> is used to serialize the java response object to json, but with @RestController, we don't need to explicitly add a @ResponseBody as we did here in this controller. It was used just to show how it can used in code.
+//@RequestBody is used to deserialize json in httpRequest to an object of ElasticQueryServiceRequestModel automatically
 //@Valid -> checks for validity of attributes inside the bean object, if any of the attribute is non-null or not empty, it validates the entire request object with that.
             //Process validations for all validation annotations on the bean object.
 @RequestMapping(value = "/documents", produces = "application/vnd.api.v1+json") //JSON API with custom vendor media type
@@ -33,11 +33,12 @@ public class ElasticDocumentController {
     public @ResponseBody ResponseEntity<List<ElasticQueryServiceResponseModel>> getAllDocuments(){
         List<ElasticQueryServiceResponseModel> response = queryService.getAllDocuments();
         LOG.info("Elasticsearch returned {} no of documents ", response.size());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response); //ok method will set HttpStatusCode as "200"
     }
 
     @GetMapping("/{id}")
     public @ResponseBody ResponseEntity<ElasticQueryServiceResponseModel> getDocumentById(@PathVariable("id") @NotEmpty String id){
+        //Mock Object -> ElasticQueryServiceResponseModel elasticQueryServiceResponseModel = ElasticQueryServiceRequestModel.builder().id(id).build();
         ElasticQueryServiceResponseModel elasticQueryServiceResponseModel = queryService.getDocumentById(id);
         LOG.info("Elasticsearch returned document with id {} ", id);
         return ResponseEntity.ok(elasticQueryServiceResponseModel);
@@ -56,7 +57,10 @@ public class ElasticDocumentController {
 
     @PostMapping("/get-document-by-text")
     public @ResponseBody ResponseEntity<List<ElasticQueryServiceResponseModel>> getDocumentByText(@RequestBody @Valid ElasticQueryServiceRequestModel elasticQueryServiceRequestModel){
-        List<ElasticQueryServiceResponseModel> response = queryService.getDocumentByText(elasticQueryServiceRequestModel.getText());
+        //Mock Object -> List<ElasticQueryServiceResponseModel> response = new ArrayList<>();
+        //ElasticQueryServiceResponseModel elasticQueryServiceResponseModel = ElasticQueryServiceResponseModel.builder().text(elasticQueryServiceRequestModel.getText());
+        //response.add(elasticQueryServiceResponseModel);
+        List<ElasticQueryServiceResponseModel> response = queryService.getDocumentByText(elasticQueryServiceRequestModel.getText()); //We could have used @PathVariable here as well, but we want to show the @PostMapping and how to deserialize the json to java object here
         LOG.info("Elasticsearch returned {} no of documents received with text {} ", response.size(), elasticQueryServiceRequestModel.getText());
         return ResponseEntity.ok(response);
     }
