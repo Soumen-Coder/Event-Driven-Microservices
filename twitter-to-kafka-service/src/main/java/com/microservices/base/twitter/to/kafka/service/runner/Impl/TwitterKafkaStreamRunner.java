@@ -1,3 +1,5 @@
+/*
+Commented out because twitter has stopped the initial version of kafka stream url and has launched the V2 version.
 package com.microservices.base.twitter.to.kafka.service.runner.Impl;
 
 import com.microservices.base.config.TwitterToKafkaServiceConfigData;
@@ -49,3 +51,4 @@ public class TwitterKafkaStreamRunner implements StreamRunner {
         }
     }
 }
+*/

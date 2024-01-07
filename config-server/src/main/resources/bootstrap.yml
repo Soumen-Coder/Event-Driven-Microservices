@@ -1,3 +1,6 @@
+#bootstrap.yml is being loaded using parent spring application context, so it will be loaded before the application yml file of the service
+#we need to set bootstrap phase configurations in this file because this bootstrap yml will require to fetch app configuration from config server repository prior to application.yml file
+#It has priority over application yml file and spring cloud config server needs to use bootstrap phase first and that's why application and bootstrap yml files are separated and the uri path is being placed here to pull configurations along with fail-first(instantly, if configs not found).
 spring:
   application:
     name: configserver
@@ -5,16 +8,22 @@ spring:
     config:
       server:
         git:
+          #uri: file://Users/.........../path_to_local_repo -> shouldn't be the preferred way, in local file system config data will not be cloned by the filesystem and it will work directly on the file system
+          #for high availability only a shared filesystem will work when all repositories will use this configuration properties
+          #even with shared file system, config server cannot clone and cache the configuration data in this scenario
+          #if you want cloning and caching, you can change to ssh with local file system or http with remote git repository
           uri: https://github.com/Soumen-Coder/spring-cloud-config-server-repository
-          default-label: main
+          #spring.cloud.config.server.git.default-label : master -> uses master by default
+          #encountered no such label master error, then had to change to main. Label is the branch name in git terms
+          default-label : main
           username: Soumen-Coder
-          password: '***************************************************************'
+          password: '*******************************************************'
+          #config server clones the config server repository on startup
           clone-on-start: true
+    # if config server cannot reach the config server repository and load the configuration, it stops immediately
     fail-fast: true
   security:
     user:
       name: spring_cloud_user
       password: '*******************************************************************'
-
-encrypt:
-  key: ${ENCRYPT_KEY}
+#http://localhost:8888/config-client/twitter_to_kafka

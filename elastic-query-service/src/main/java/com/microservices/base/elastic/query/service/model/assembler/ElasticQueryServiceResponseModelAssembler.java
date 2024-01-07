@@ -18,7 +18,7 @@ public class ElasticQueryServiceResponseModelAssembler extends RepresentationMod
     private final ElasticToResponseModelTransformer transformer;
 
     public ElasticQueryServiceResponseModelAssembler(ElasticToResponseModelTransformer transformer) {
-        super(ElasticDocumentController.class, ElasticQueryServiceResponseModel.class);
+        super(ElasticDocumentController.class, ElasticQueryServiceResponseModel.class); // This is to tell assembler that we are using controller and response model for hateoas
         this.transformer = transformer;
     }
 
@@ -26,12 +26,14 @@ public class ElasticQueryServiceResponseModelAssembler extends RepresentationMod
     public ElasticQueryServiceResponseModel toModel(TwitterIndexModel twitterIndexModel) {
         ElasticQueryServiceResponseModel response = transformer.getResponseModel(twitterIndexModel);
         response.add(
+                //WebMvcLinkBuilder class's -> linkTo and methodOn are the static method, that are used here, which can be used with RepresentationModelAssemblerSupport
+                //LinkBuilderSupport class's -> withSelfRel and withRel are the static method, that are used here, which can be used with RepresentationModelAssemblerSupport
                 linkTo(methodOn(ElasticDocumentController.class)
                         .getDocumentById(twitterIndexModel.getId()))
-                        .withSelfRel());
+                        .withSelfRel()); // link to own self, getDocumentById
         response.add(
                 linkTo(ElasticDocumentController.class)
-                        .withRel("documents"));
+                        .withRel("documents")); // link to fetch all documents by document's base path
         return response;
     }
 

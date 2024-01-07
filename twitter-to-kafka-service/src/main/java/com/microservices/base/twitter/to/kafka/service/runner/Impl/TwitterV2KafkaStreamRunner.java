@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Component
 //@ConditionalOnProperty(value = "${twitter-to-kafka-service.enable-v2-tweets}", havingValue = "true", matchIfMissing = true) -> allows to load a spring bean at runtime with the configuration value, if true, then only this will load
-@ConditionalOnExpression("${twitter-to-kafka-service.enable-mock-tweets} && not ${twitter-to-kafka-service.enable-v2-tweets}")
+@ConditionalOnExpression("${twitter-to-kafka-service.enable-v2-tweets} && not ${twitter-to-kafka-service.enable-mock-tweets}")
 public class TwitterV2KafkaStreamRunner implements StreamRunner {
     private static final Logger LOG = LoggerFactory.getLogger(TwitterV2KafkaStreamRunner.class);
 

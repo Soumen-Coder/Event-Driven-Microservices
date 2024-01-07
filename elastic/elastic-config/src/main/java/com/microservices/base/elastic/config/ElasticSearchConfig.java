@@ -45,7 +45,7 @@ public class ElasticSearchConfig extends AbstractElasticsearchConfiguration {
     }
 
     @Bean
-    public ElasticsearchOperations elasticSearchTemplate(){
+    public ElasticsearchOperations elasticsearchOperations(){
         return new ElasticsearchRestTemplate(elasticsearchClient()); //This will be required for ElasticSearch repositories for indexing, an alternate method to save ids to elasticsearch, less code but less flexibility
     }
 }

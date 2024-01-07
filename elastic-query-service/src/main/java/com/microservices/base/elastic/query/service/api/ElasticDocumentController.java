@@ -56,6 +56,7 @@ public class ElasticDocumentController {
     }
 
     @PostMapping("/get-document-by-text")
+    //@Valid annotation -> process the annotations like @NotEmpty, NonNull, etc on the request objects
     public @ResponseBody ResponseEntity<List<ElasticQueryServiceResponseModel>> getDocumentByText(@RequestBody @Valid ElasticQueryServiceRequestModel elasticQueryServiceRequestModel){
         //Mock Object -> List<ElasticQueryServiceResponseModel> response = new ArrayList<>();
         //ElasticQueryServiceResponseModel elasticQueryServiceResponseModel = ElasticQueryServiceResponseModel.builder().text(elasticQueryServiceRequestModel.getText());

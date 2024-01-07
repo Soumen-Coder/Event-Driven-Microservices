@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class ElasticToResponseModelTransformer {
+    //Convert ElasticModel(TwitterIndexModel) to ResponseModel(ElasticQueryServiceResponseModel)
+    //This class is being used by the ElasticQueryServiceResponseModelAssembler class
     public ElasticQueryServiceResponseModel getResponseModel(TwitterIndexModel twitterIndexModel){
         return ElasticQueryServiceResponseModel
                 .builder()
