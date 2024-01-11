@@ -1,0 +1,17 @@
+<div th:replace="header"></div>
+
+<div class="container float-left">
+    <!-- unless the user is authenticated, then show the message, login to start searching, where login is a link, takes to the home.html-->
+    <div th:unless="${#authorization.expression('isAuthenticated()')}">
+        <p>Please <a th:href="@{/home}">login</a> to start searching</p>
+    </div>
+
+    <!-- if the user is authenticated, show message Hello, ${username} Let's get start searching!, where the entire message is a link to home.html-->
+    <div th:if="${#authorization.expression('isAuthenticated()')}">
+        <p>Hello <span th:text="${#authentication.principal.username}"/><a th:href="@{/home}"> Let's get start searching!</a></p>
+    </div>
+</div>
+
+<div th:replace="footer"></div>
+
+

@@ -1,0 +1,70 @@
+<!-- Shows the results of the webclient call on the webpage -->
+<!--This is a html page with standard html tags, but we have used th tags that thymeleaf provides to communicate with backend classes -->
+
+<div th:replace="header"></div>
+
+<!-- we have used bootstrap css class definitions inside html tags like container, button and form-group which are used to add styles to the page -->
+<div class="container">
+    <h1>Query Client</h1>
+    <div class="mx-auto mt-5">
+        <!-- First, we have a form here, where action is set as th:action and set as /query-by-text path
+        We will define the /query-by-text api with an endpoint in the controller
+        and the response object is set using th:object here.
+        This way , we match this form with a java class on the controller.
+        We have used HTTP POST method on the form and used text field to enter the search text -->
+        <form class="col-12" action="#" th:action="@{/query-by-text}" th:object="${elasticQueryWebClientRequestModel}" method="post">
+            <div class="form-group">
+                <!-- -->
+                <input class="form-control" type="text" th:field="*{text}" id="text" placeholder="Enter text to search">
+                <span th:if="${#fields.hasErrors('text')}" th:errors="*{text}"></span>
+                <div class="text-center mt-5">
+                    <input class="btn btn-dark" type="submit" value="Search"> <!-- we have the search button here -->
+                </div>
+            </div>
+            <!-- This webpage then checks the variable elasticQueryWebClientRequestModels in the spring context which will be populated on the controller class
+            And then, we iterate over it using the th:each tag and print results using th:text tag
+            th:each tag to iterate over a list in thymeleaf template -->
+            <!-- th:switch and th:case constructs which are tags to provide switch statements as in java in a thymeleaf template
+            we check it using th:case and if object is null we print either error or default text
+            and otherwise show the results-->
+            <div class="col-12" th:switch="${elasticQueryWebClientResponseModels}">
+                <h4 th:case="null">
+                    <span th:text="${error != null} ? ${error} : 'No results yet!'"/>
+                </h4>
+                <div th:case="*">
+                    <h4>Search results for '<span th:text="${searchText}"/>'</h4>
+                    <table class="table table-striped">
+                        <!--heading-->
+                        <thead>
+                        <tr>
+                            <!-- th:scope for col scoped variable-->
+                            <th scope="col">id</th>
+                            <th scope="col">text</th>
+                            <th scope="col">date</th>
+                        </tr>
+                        </thead>
+                        <!-- Body to be populated -->
+                        <tbody>
+                        <!-- loop using th:each tag -->
+                        <tr th:each="elasticQueryWebClientResponseModel : ${elasticQueryWebClientResponseModels}">
+                            <!-- print using th:text tag -->
+                            <!-- th:row for row scoped variable-->
+                            <th scope="row" th:text="${elasticQueryWebClientResponseModel.id}"></th>
+                            <td th:text="${elasticQueryWebClientResponseModel.userId}"></td>
+                            <td th:text="${elasticQueryWebClientResponseModel.text}"></td>
+                            <td th:text="${elasticQueryWebClientResponseModel.createdAt}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div th:replace="footer"></div>
+
+
+
+
