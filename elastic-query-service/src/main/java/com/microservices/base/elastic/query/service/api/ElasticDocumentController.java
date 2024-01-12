@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,9 @@ import java.util.List;
 public class ElasticDocumentController {
     private static final Logger LOG = LoggerFactory.getLogger(ElasticDocumentController.class);
     private final ElasticQueryService queryService;
+
+    @Value("${server.port}")
+    private String port;
 
     public ElasticDocumentController(ElasticQueryService queryService) {
         this.queryService = queryService;
@@ -106,7 +110,7 @@ public class ElasticDocumentController {
         //ElasticQueryServiceResponseModel elasticQueryServiceResponseModel = ElasticQueryServiceResponseModel.builder().text(elasticQueryServiceRequestModel.getText());
         //response.add(elasticQueryServiceResponseModel);
         List<ElasticQueryServiceResponseModel> response = queryService.getDocumentByText(elasticQueryServiceRequestModel.getText()); //We could have used @PathVariable here as well, but we want to show the @PostMapping and how to deserialize the json to java object here
-        LOG.info("Elasticsearch returned {} no of documents received with text {} ", response.size(), elasticQueryServiceRequestModel.getText());
+        LOG.info("Elasticsearch returned {} no of documents received with text {} on port {}", response.size(), elasticQueryServiceRequestModel.getText(), port);
         return ResponseEntity.ok(response);
     }
 
